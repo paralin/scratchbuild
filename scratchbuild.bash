@@ -26,7 +26,7 @@ CREW_ARM_BASE_IMAGES=(\
 )
 
 CREW_X86_64_BASE_IMAGES=(\
-  ubuntu=ubuntu
+  ubuntu=ubuntu \
 )
 
 crew_log_info1() {
@@ -97,6 +97,39 @@ case "$1" in
     # Make sure ctrl c is capable of killing everything
     CREW_REGISTER_SCRATCH_INTERRUPT
 
+    # Check to see if this is a supported pullable image
+    CREW_ARCH_BASE_IMAGES_VAR=CREW_${ARCHUPPER}_BASE_IMAGES
+    eval CREW_BASE_IMAGES=\( \${${CREW_ARCH_BASE_IMAGES_VAR}[@]} \)
+    if [ -n "$CREW_BASE_IMAGES" ]; then
+      CREW_BASE_IMAGE=
+      for i in "${CREW_BASE_IMAGES[@]}"; do
+        ipts=(${i//=/ })
+        if [ "${ipts[0]}" == "${IMAGE_PTS[0]}" ]; then
+          CREW_BASE_IMAGE="${ipts[1]}"
+          break
+        fi
+      done
+      if [ -n "$CREW_BASE_IMAGE" ]; then
+        # Check for version override
+        CREW_ARCH_BASE_IMAGES_VERSION_VAR="CREW_${ARCHUPPER}_${IMAGENAMEUPPER}_VERSION_REMAP[@]"
+        CREW_BASE_IMAGE_VERSION="${IMAGEVERSION}"
+        CREW_ARCH_BASE_IMAGES_VERSION=(${!CREW_ARCH_BASE_IMAGES_VERSION_VAR})
+        if [ ${#CREW_ARCH_BASE_IMAGES_VERSION[@]} -ne 0 ]; then
+          for i in "${CREW_ARCH_BASE_IMAGES_VERSION[@]}"; do
+            ipts=(${i//=/ })
+            if [ "${ipts[0]}" == "${IMAGEVERSION}" ]; then
+              CREW_BASE_IMAGE_VERSION="${ipts[1]}"
+              break
+            fi
+          done
+        fi
+        echo "${IMAGE} can be properly provided on ${ARCH} by ${CREW_BASE_IMAGE}:${CREW_BASE_IMAGE_VERSION}, pulling it..."
+        export CREW_SUB_IMAGE="${CREW_BASE_IMAGE}:${CREW_BASE_IMAGE_VERSION}"
+        docker pull ${CREW_SUB_IMAGE}
+        echo $CREW_SUB_IMAGE
+        exit 0
+      fi
+    fi
     # If CREW_SCRATCHSESSION not set check if a scratchbuild session is running already and wait if so
     CREW_OFFICIAL_IMAGES_PATH="${CREW_SCRATCH_TMPDIR}/official-images/"
     if [ -z "$CREW_SCRATCHSESSION" ]; then
@@ -130,40 +163,6 @@ case "$1" in
           idx=$((idx + 1))
         done
         popd
-      fi
-    fi
-
-    # Check to see if this is a supported pullable image
-    CREW_ARCH_BASE_IMAGES_VAR=CREW_${ARCHUPPER}_BASE_IMAGES
-    CREW_BASE_IMAGES=${!CREW_ARCH_BASE_IMAGES_VAR}
-    if [ -n "$CREW_BASE_IMAGES" ]; then
-      CREW_BASE_IMAGE=
-      for i in "${CREW_BASE_IMAGES[@]}"; do
-        ipts=(${i//=/ })
-        if [ "${ipts[0]}" == "${IMAGE_PTS[0]}" ]; then
-          CREW_BASE_IMAGE="${ipts[1]}"
-          break
-        fi
-      done
-      if [ -n "$CREW_BASE_IMAGE" ]; then
-        # Check for version override
-        CREW_ARCH_BASE_IMAGES_VERSION_VAR="CREW_${ARCHUPPER}_${IMAGENAMEUPPER}_VERSION_REMAP[@]"
-        CREW_BASE_IMAGE_VERSION="${IMAGEVERSION}"
-        CREW_ARCH_BASE_IMAGES_VERSION=(${!CREW_ARCH_BASE_IMAGES_VERSION_VAR})
-        if [ ${#CREW_ARCH_BASE_IMAGES_VERSION[@]} -ne 0 ]; then
-          for i in "${CREW_ARCH_BASE_IMAGES_VERSION[@]}"; do
-            ipts=(${i//=/ })
-            if [ "${ipts[0]}" == "${IMAGEVERSION}" ]; then
-              CREW_BASE_IMAGE_VERSION="${ipts[1]}"
-              break
-            fi
-          done
-        fi
-        echo "${IMAGE} can be properly provided on ${ARCH} by ${CREW_BASE_IMAGE}:${CREW_BASE_IMAGE_VERSION}, pulling it..."
-        export CREW_SUB_IMAGE="${CREW_BASE_IMAGE}:${CREW_BASE_IMAGE_VERSION}"
-        docker pull ${CREW_SUB_IMAGE}
-        echo $CREW_SUB_IMAGE
-        exit 0
       fi
     fi
 

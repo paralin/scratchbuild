@@ -42,11 +42,14 @@ crew_log_info2() {
 # CREW_ARM_UBUNTU_VERSION_REMAP=( precise=12.04 )
 
 
-CREW_SCRATCH_TMPDIR="/tmp/crewscratch"
-if mountpoint -q /mnt/persist ; then
-  CREW_SCRATCH_TMPDIR="/mnt/persist/tmp/crewscratch"
-  mkdir -p $CREW_SCRATCH_TMPDIR
+if [ -z "$CREW_SCRATCH_TMPDIR" ]; then
+  CREW_SCRATCH_TMPDIR="/tmp/crewscratch-$(date +%s)"
+  if mountpoint -q /mnt/persist ; then
+    CREW_SCRATCH_TMPDIR="/mnt/persist/tmp/crewscratch-$(date +%s)"
+    mkdir -p $CREW_SCRATCH_TMPDIR
+  fi
 fi
+export CREW_SCRATCH_TMPDIR
 
 function CREW_CLEANUP_SCRATCH {
   rm -rf $CREW_SCRATCH_TMPDIR;

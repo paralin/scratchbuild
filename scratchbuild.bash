@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set +x
 set -eo pipefail; [[ $SCRATCH_TRACE ]] && set -x
 if [ -z "$ARCH" ]; then
   ARCH=$(uname -m)

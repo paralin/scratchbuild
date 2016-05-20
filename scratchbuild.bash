@@ -143,14 +143,18 @@ case "$1" in
     CREW_OFFICIAL_IMAGES_PATH="${CREW_SCRATCH_TMPDIR}/official-images/"
     if [ -z "$CREW_SCRATCHSESSION" ]; then
       CREW_SCRATCHSESSION=1
-      if [ -d "$CREW_SCRATCH_TMPDIR" ]; then
-        crew_log_info2 "A scratch build is already in progress, waiting...";
-      fi
+      if [ -n "$CREW_IGNORE_EXISTING_SBDIR" ]; then
+        rm -rf $CREW_SCRATCH_TMPDIR || true
+      else
+        if [ -d "$CREW_SCRATCH_TMPDIR" ]; then
+          crew_log_info2 "A scratch build is already in progress, waiting...";
+        fi
 
-      until [ ! -d "$CREW_SCRATCH_TMPDIR" ]
-      do
-        sleep 1
-      done
+        until [ ! -d "$CREW_SCRATCH_TMPDIR" ]
+        do
+          sleep 1
+        done
+      fi
 
       # Register trap for exit to cleanup
       CREW_REGISTER_SCRATCH_CLEANUP

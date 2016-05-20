@@ -40,7 +40,12 @@ crew_log_info2() {
 # Can specify version remaps like so:
 # CREW_ARM_UBUNTU_VERSION_REMAP=( precise=12.04 )
 
+
 CREW_SCRATCH_TMPDIR="/tmp/crewscratch"
+if mountpoint -q /mnt/persist ; then
+  CREW_SCRATCH_TMPDIR="/mnt/persist/tmp/crewscratch"
+  mkdir -p $CREW_SCRATCH_TMPDIR
+fi
 
 function CREW_CLEANUP_SCRATCH {
   rm -rf $CREW_SCRATCH_TMPDIR;

@@ -7,6 +7,9 @@ fi
 if [[ $ARCH == armv* ]]; then
   ARCH=arm
 fi
+if [[ $ARCH == aarch* ]]; then
+  ARCH=arm
+fi
 ARCHUPPER=$(echo "$ARCH" | awk '{print toupper($0)}')
 
 # To save time these base images are used instead of compiling all the way down
@@ -14,7 +17,6 @@ ARCHUPPER=$(echo "$ARCH" | awk '{print toupper($0)}')
 CREW_ARM_BASE_IMAGES=(\
   ubuntu=armbuild/ubuntu \
   alpine=armbuild/alpine \
-  "slackware-miniroot"=armbuild/slackware-miniroot \
   busybox=armbuild/busybox \
   golang=armbuild/golang \
   wordpress=armbuild/wordpress \

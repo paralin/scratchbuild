@@ -245,7 +245,7 @@ case "$1" in
 
     crew_log_info1 "Starting docker build on ${IMAGE}...";
     ID=$(docker build "$CREW_SCRATCH_REPO_BUILD_PATH" | tee >(cat - >&5) | tail -n1 | grep -o '[^ ]*$')
-    docker tag -f $ID $IMAGE
+    docker tag $ID $IMAGE
     echo $IMAGE
 
     exit 0

@@ -13,6 +13,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 )
 
+// LibraryRepo is the Git URL to the official images repository.
 var LibraryRepo = "https://github.com/docker-library/official-images.git"
 
 // LibraryResolver attempts to resolve the source of a library Dockerfile.
@@ -108,7 +109,7 @@ func BuildLibraryResolver(cacheDir string) (*LibraryResolver, error) {
 		os.RemoveAll(repoDir)
 	}
 	if repo == nil {
-		r, err := git.PlainClone(repoDir, false, &git.CloneOptions{
+		_, err := git.PlainClone(repoDir, false, &git.CloneOptions{
 			Depth:    1,
 			Progress: os.Stdout,
 			URL:      LibraryRepo,
@@ -116,7 +117,7 @@ func BuildLibraryResolver(cacheDir string) (*LibraryResolver, error) {
 		if err != nil {
 			return nil, err
 		}
-		repo = r
+		// repo = r
 	}
 	return NewLibraryResolver(path.Join(repoDir, "library"), cacheDir), nil
 }

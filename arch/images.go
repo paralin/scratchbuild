@@ -1,6 +1,6 @@
 package arch
 
-// ArchBaseImages lists known compatible equivilents for amd64 images on other arches.
+// ArchBaseImages lists known compatible equivalents for amd64 images on other arches.
 var ArchBaseImages = map[KnownArch]map[string]string{
 	ARM: {
 		"library/ubuntu":    "ioft/armhf-ubuntu",
@@ -10,7 +10,7 @@ var ArchBaseImages = map[KnownArch]map[string]string{
 	},
 }
 
-// CompatibleBaseImage checks for a equivilent/compat image for a target platform.
+// CompatibleBaseImage checks for a equivalent/compatible image for a target platform.
 func CompatibleBaseImage(targetArch KnownArch, image string) (string, bool) {
 	if targetArch == AMD64 {
 		return image, true

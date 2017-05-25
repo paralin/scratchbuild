@@ -8,11 +8,11 @@ import (
 type KnownArch int
 
 const (
-	// The AMD64 architecture.
+	// AMD64 architecture.
 	AMD64 KnownArch = iota
-	// The ARM architecture.
+	// ARM architecture.
 	ARM
-	// The ARM64 architecture.
+	// ARM64 64-bit ARM architecture.
 	ARM64
 )
 
@@ -30,7 +30,7 @@ var KnownArchNames = map[string]KnownArch{
 	"i386":   AMD64, // iffy
 }
 
-// KnownArchCompat contains known compatiblities between architectures.
+// KnownArchCompat contains known compatibilities between architectures.
 var KnownArchCompat = map[KnownArch][]KnownArch{
 	// ARM64 can use ARM images.
 	ARM64: {ARM},

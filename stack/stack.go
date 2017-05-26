@@ -1,6 +1,7 @@
 package stack
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
@@ -30,17 +31,43 @@ func (s *ImageStack) RebaseOnArch(target arch.KnownArch) error {
 			continue
 		}
 		compatImage, ok := arch.CompatibleBaseImage(target, refName)
-		if ok {
-			log.Debugf("Rebasing using %s -> %s", refName, compatImage)
-			// base on this
-			s.Layers = s.Layers[:i+1]
-			layer.Dockerfile = nil
-			layer.Path = ""
-			img, _ := ParseImageName(compatImage)
-			layer.Reference = img
+		if !ok {
+			continue
+		}
+
+		log.Debugf("Rebasing using %s -> %s", refName, compatImage)
+		// base on this
+		s.Layers = s.Layers[:i+1]
+		layer.Dockerfile = nil
+		layer.Path = ""
+		if tagged, ok := layer.Reference.(reference.NamedTagged); ok {
+			compatImage = fmt.Sprintf("%s:%s", compatImage, tagged.Tag())
+		}
+		img, _ := ParseImageName(compatImage)
+		layer.Reference = img
+
+		if i != 0 {
+			previousLayer := s.Layers[i-1]
+			previousLayer.RewriteFrom(img)
 		}
 	}
 	return nil
+}
+
+// RewriteFrom rewrites the FROM definition in the dockerfile.
+func (l *ImageLayer) RewriteFrom(img reference.Reference) {
+	if l.Dockerfile == nil {
+		return
+	}
+
+	ast := l.Dockerfile.AST
+	for _, line := range ast.Children {
+		if line.Value == "from" {
+			line.Next = &dfparser.Node{Value: img.String()}
+			line.Original = fmt.Sprintf("FROM %s", line.Next.Value)
+			break
+		}
+	}
 }
 
 // String represents the stack as a string.
@@ -54,6 +81,18 @@ func (s *ImageStack) String() string {
 		results.WriteString(" ")
 	}
 	return results.String()
+}
+
+// ToDockerfile produces a series of dockerfiles representing the stack.
+func (s *ImageStack) ToDockerfile() string {
+	var result bytes.Buffer
+	for i, image := range s.Layers {
+		result.WriteString(image.ToDockerfile())
+		if i != len(s.Layers)-1 {
+			result.WriteString("\n---\n")
+		}
+	}
+	return result.String()
 }
 
 // ImageLayer is a layer in a stack.
@@ -76,6 +115,28 @@ func (l *ImageLayer) ParseDockerfile(source string) error {
 	return nil
 }
 
+// ToDockerfile produces a Dockerfile equivilent to the original source.
+func (l *ImageLayer) ToDockerfile() string {
+	if l.Dockerfile == nil {
+		return ""
+	}
+	var result bytes.Buffer
+	// iterate over lines in the source, trim the ( and )
+	scanner := bufio.NewScanner(strings.NewReader(l.Dockerfile.AST.Dump()))
+	for scanner.Scan() {
+		text := scanner.Text()
+		if strings.HasPrefix(text, "(") && strings.HasSuffix(text, ")") {
+			runes := ([]rune(text))[1:]
+			runes[len(runes)-1] = '\n'
+			result.WriteString(string(runes))
+		} else {
+			result.WriteString(text)
+			result.WriteString("\n")
+		}
+	}
+	return result.String()
+}
+
 // LibraryResolver resolves dockerfile sources for library images.
 type LibraryResolver interface {
 	// GetLibrarySource clones the source for the Dockerfile
@@ -83,9 +144,25 @@ type LibraryResolver interface {
 }
 
 // ImageStackFromDockerfile attempts to determine the full stack of the docker image.
-func ImageStackFromDockerfile(imageRef reference.Named, source string, resolver LibraryResolver) (*ImageStack, error) {
+func ImageStackFromPath(buildPath string, dockerfilePath string, targetTag string, resolver LibraryResolver) (*ImageStack, error) {
+	imageRef, err := ParseImageName(targetTag)
+	if err != nil {
+		return nil, err
+	}
+
+	dockerfilePath = path.Clean(dockerfilePath)
+	if !path.IsAbs(dockerfilePath) {
+		dockerfilePath = path.Join(buildPath, dockerfilePath)
+	}
+
+	sourceBin, err := ioutil.ReadFile(dockerfilePath)
+	if err != nil {
+		return nil, err
+	}
+	source := string(sourceBin)
+
 	stack := &ImageStack{Reference: imageRef}
-	baseLayer := &ImageLayer{Reference: imageRef}
+	baseLayer := &ImageLayer{Reference: imageRef, Path: buildPath}
 	if err := baseLayer.ParseDockerfile(source); err != nil {
 		return nil, err
 	}

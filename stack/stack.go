@@ -151,6 +151,10 @@ func ImageStackFromPath(buildPath string, dockerfilePath string, targetTag strin
 		return nil, err
 	}
 
+	if dockerfilePath == "" {
+		dockerfilePath = "Dockerfile"
+	}
+
 	dockerfilePath = path.Clean(dockerfilePath)
 	if !path.IsAbs(dockerfilePath) {
 		dockerfilePath = path.Join(buildPath, dockerfilePath)

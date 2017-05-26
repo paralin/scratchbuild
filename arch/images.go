@@ -7,6 +7,7 @@ var ArchBaseImages = map[KnownArch]map[string]string{
 		"library/alpine":    "container4armhf/armhf-alpine",
 		"library/busybox":   "container4armhf/armhf-busybox",
 		"library/archlinux": "armv7/armhf-archlinux",
+		"library/debian":    "armbuild/debian",
 	},
 }
 

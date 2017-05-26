@@ -84,7 +84,7 @@ var BuildCommand = cli.Command{
 		}
 
 		// build stack
-		stk, err := stack.ImageStackFromPath(buildPath, buildArgs.Dockerfile, buildArgs.Tag, lib)
+		stk, err := stack.ImageStackFromPath(buildPath, buildArgs.Dockerfile, buildArgs.Tag, lib, targetArch)
 		if err != nil {
 			return err
 		}

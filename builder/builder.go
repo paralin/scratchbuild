@@ -98,11 +98,7 @@ func (b *Builder) dockerBuild(dir string, dockerfileSrc string, reference string
 func (b *Builder) Build() error {
 	// Ensure we have a clear path to our destination.
 	// This means our chain needs to have Dockerfiles all the way down to the last element.
-	for i, layer := range b.stack.Layers {
-		if i == len(b.stack.Layers)-1 {
-			break
-		}
-
+	for _, layer := range b.stack.Layers[:len(b.stack.Layers)-1] {
 		layerRef := layer.Reference.String()
 		if layer.Dockerfile == nil {
 			return fmt.Errorf("Cannot build, do not know the source for %s", layerRef)
@@ -124,7 +120,9 @@ func (b *Builder) Build() error {
 
 		layerRef := layer.Reference.String()
 		log.WithField("ref", layerRef).Debug("Building")
-		if err := b.dockerBuild(layer.Path, layer.ToDockerfile(), layerRef); err != nil {
+		dockerSrc := layer.ToDockerfile()
+		fmt.Printf("%s\n", dockerSrc)
+		if err := b.dockerBuild(layer.Path, dockerSrc, layerRef); err != nil {
 			return err
 		}
 	}

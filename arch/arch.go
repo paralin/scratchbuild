@@ -8,8 +8,9 @@ import (
 type KnownArch int
 
 const (
+	NONE KnownArch = iota
 	// AMD64 architecture.
-	AMD64 KnownArch = iota
+	AMD64
 	// ARM architecture.
 	ARM
 	// ARM64 64-bit ARM architecture.

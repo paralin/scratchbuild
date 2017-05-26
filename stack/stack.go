@@ -38,13 +38,13 @@ func (s *ImageStack) RebaseOnArch(target arch.KnownArch) error {
 		log.Debugf("Rebasing using %s -> %s", refName, compatImage)
 		// base on this
 		s.Layers = s.Layers[:i+1]
-		layer.Dockerfile = nil
-		layer.Path = ""
 		if tagged, ok := layer.Reference.(reference.NamedTagged); ok {
 			compatImage = fmt.Sprintf("%s:%s", compatImage, tagged.Tag())
 		}
 		img, _ := ParseImageName(compatImage)
 		layer.Reference = img
+		layer.Dockerfile = nil
+		layer.Path = ""
 
 		if i != 0 {
 			previousLayer := s.Layers[i-1]
@@ -65,7 +65,22 @@ func (l *ImageLayer) RewriteFrom(img reference.Reference) {
 		if line.Value == "from" {
 			line.Next = &dfparser.Node{Value: img.String()}
 			line.Original = fmt.Sprintf("FROM %s", line.Next.Value)
-			break
+
+			var resultDockerfile bytes.Buffer
+			lineIdx := line.StartLine - 1
+			scanner := bufio.NewScanner(strings.NewReader(l.OriginalDockerfile))
+			i := 0
+			for scanner.Scan() {
+				text := scanner.Text()
+				if i == lineIdx {
+					resultDockerfile.WriteString(line.Original)
+				} else {
+					resultDockerfile.WriteString(text)
+				}
+				resultDockerfile.WriteString("\n")
+				i++
+			}
+			l.OriginalDockerfile = resultDockerfile.String()
 		}
 	}
 }
@@ -103,6 +118,8 @@ type ImageLayer struct {
 	Dockerfile *dfparser.Result
 	// Path is the path to the dockerfile directory for this image layer.
 	Path string
+	// OriginalDockerfile is the original source for the dockerfile.
+	OriginalDockerfile string
 }
 
 // ParseDockerfile applies a Dockerfile source to a layer.
@@ -112,29 +129,13 @@ func (l *ImageLayer) ParseDockerfile(source string) error {
 		return err
 	}
 	l.Dockerfile = res
+	l.OriginalDockerfile = source
 	return nil
 }
 
 // ToDockerfile produces a Dockerfile equivilent to the original source.
 func (l *ImageLayer) ToDockerfile() string {
-	if l.Dockerfile == nil {
-		return ""
-	}
-	var result bytes.Buffer
-	// iterate over lines in the source, trim the ( and )
-	scanner := bufio.NewScanner(strings.NewReader(l.Dockerfile.AST.Dump()))
-	for scanner.Scan() {
-		text := scanner.Text()
-		if strings.HasPrefix(text, "(") && strings.HasSuffix(text, ")") {
-			runes := ([]rune(text))[1:]
-			runes[len(runes)-1] = '\n'
-			result.WriteString(string(runes))
-		} else {
-			result.WriteString(text)
-			result.WriteString("\n")
-		}
-	}
-	return result.String()
+	return l.OriginalDockerfile
 }
 
 // LibraryResolver resolves dockerfile sources for library images.
@@ -144,7 +145,7 @@ type LibraryResolver interface {
 }
 
 // ImageStackFromDockerfile attempts to determine the full stack of the docker image.
-func ImageStackFromPath(buildPath string, dockerfilePath string, targetTag string, resolver LibraryResolver) (*ImageStack, error) {
+func ImageStackFromPath(buildPath string, dockerfilePath string, targetTag string, resolver LibraryResolver, rebaseArch arch.KnownArch) (*ImageStack, error) {
 	imageRef, err := ParseImageName(targetTag)
 	if err != nil {
 		return nil, err
@@ -167,18 +168,17 @@ func ImageStackFromPath(buildPath string, dockerfilePath string, targetTag strin
 		return nil, err
 	}
 	stack.Layers = []*ImageLayer{baseLayer}
-	return stack, stack.processDockerfile(resolver)
+	return stack, stack.processDockerfile(resolver, rebaseArch)
 }
 
 // processDockerfile processes the next dockerfile in the stack.
-func (s *ImageStack) processDockerfile(resolver LibraryResolver) error {
+func (s *ImageStack) processDockerfile(resolver LibraryResolver, rebaseArch arch.KnownArch) error {
 	layer := s.Layers[len(s.Layers)-1]
 	if layer.Dockerfile == nil || layer.Reference.Name() == "scratch" {
 		return nil
 	}
 
 	lines := layer.Dockerfile.AST.Children
-
 	var nlayer *ImageLayer
 	for _, line := range lines {
 		if line.Value == "from" {
@@ -204,13 +204,7 @@ func (s *ImageStack) processDockerfile(resolver LibraryResolver) error {
 		return nil
 	}
 
-	// Attempt to find the source for this image.
-	le := log.WithField("image", nlayer.Reference.Name())
-	if !strings.HasPrefix(nlayer.Reference.Name(), "library/") {
-		le.Debug("Not a library image, cannot determine Dockerfile source.")
-		return nil
-	}
-
+	le := log.WithField("image", nlayer.Reference.String())
 	tagged, ok := nlayer.Reference.(reference.NamedTagged)
 	if !ok {
 		le.Debug("No tag given, assuming latest")
@@ -219,6 +213,33 @@ func (s *ImageStack) processDockerfile(resolver LibraryResolver) error {
 			return err
 		}
 		tagged = t
+	}
+
+	if rebaseArch != arch.NONE {
+		layerRefName := tagged.Name()
+		cbi, ok := arch.CompatibleBaseImage(rebaseArch, layerRefName)
+		cbi = fmt.Sprintf("%s:%s", cbi, tagged.Tag())
+		if ok {
+			nlayer.Dockerfile = nil
+			ref, err := ParseImageName(cbi)
+			if err != nil {
+				return err
+			}
+			nlayer.Reference = ref
+			nlayer.Path = ""
+
+			if len(s.Layers) > 1 {
+				previousLayer := s.Layers[len(s.Layers)-2]
+				previousLayer.RewriteFrom(ref)
+			}
+			return nil
+		}
+	}
+
+	// Attempt to find the source for this image.
+	if !strings.HasPrefix(tagged.Name(), "library/") {
+		le.Debug("Not a library image, cannot determine Dockerfile source.")
+		return nil
 	}
 
 	srcPath, err := resolver.GetLibrarySource(tagged)
@@ -240,5 +261,5 @@ func (s *ImageStack) processDockerfile(resolver LibraryResolver) error {
 		return nil
 	}
 
-	return s.processDockerfile(resolver)
+	return s.processDockerfile(resolver, rebaseArch)
 }

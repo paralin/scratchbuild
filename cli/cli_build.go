@@ -7,13 +7,13 @@ import (
 	"os"
 	"runtime"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/docker/docker/client"
 	"github.com/paralin/scratchbuild/arch"
 	"github.com/paralin/scratchbuild/builder"
 	"github.com/paralin/scratchbuild/library"
 	"github.com/paralin/scratchbuild/stack"
-	"github.com/urfave/cli"
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 )
 
 var buildArgs struct {
@@ -25,7 +25,7 @@ var buildArgs struct {
 }
 
 // BuildCommand is the command to build the image.
-var BuildCommand = cli.Command{
+var BuildCommand = &cli.Command{
 	Name:  "build",
 	Usage: "Builds the image in the specified directory.",
 	Action: func(c *cli.Context) (rerr error) {
@@ -106,32 +106,33 @@ var BuildCommand = cli.Command{
 		return bldr.Build()
 	},
 	Flags: []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:        "tag, t",
 			Usage:       "Tag the final image will be labeled with.",
 			Destination: &buildArgs.Tag,
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:        "arch, m",
 			Usage:       "The target architecture. Default is to use the system arch.",
 			Value:       runtime.GOARCH,
 			Destination: &buildArgs.Arch,
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:        "dockerfile, f",
 			Usage:       "The dockerfile to use. Relative to build directory if rel, otherwise absolute.",
 			Value:       "Dockerfile",
 			Destination: &buildArgs.Dockerfile,
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:        "cachedir",
 			Usage:       "The cache directory used to download source repositories. Default is to use a temporary directory.",
 			Destination: &buildArgs.CacheDir,
 		},
-		cli.BoolTFlag{
+		&cli.BoolFlag{
 			Name:        "cleanup",
 			Usage:       "Clean up the cache directory when done. Default is true.",
 			Destination: &buildArgs.Cleanup,
+			Value:       true,
 		},
 	},
 }

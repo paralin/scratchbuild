@@ -6,7 +6,7 @@ require (
 	github.com/docker-library/go-dockerlibrary v0.0.0-20200821205225-669fbe5c1d52
 	github.com/docker/cli v23.0.0-rc.1+incompatible
 	github.com/docker/distribution v2.8.1+incompatible
-	github.com/docker/docker v23.0.0-rc.1+incompatible
+	github.com/docker/docker v23.0.0-rc.2+incompatible
 	github.com/moby/buildkit v0.11.0
 	github.com/ryanuber/go-glob v1.0.0
 	github.com/sirupsen/logrus v1.9.0

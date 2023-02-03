@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/docker-library/go-dockerlibrary v0.0.0-20200821205225-669fbe5c1d52
-	github.com/docker/cli v20.10.22+incompatible
+	github.com/docker/cli v23.0.0+incompatible
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker v20.10.22+incompatible
 	github.com/moby/buildkit v0.10.0
@@ -32,6 +32,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20190725054713-01f96b0aa0cd // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/moby/patternmatcher v0.5.0 // indirect
 	github.com/moby/sys/mount v0.3.0 // indirect
 	github.com/moby/sys/mountinfo v0.6.0 // indirect
 	github.com/moby/sys/symlink v0.2.0 // indirect

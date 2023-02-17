@@ -10,7 +10,7 @@ require (
 	github.com/moby/buildkit v0.11.2
 	github.com/ryanuber/go-glob v1.0.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/urfave/cli/v2 v2.24.3
+	github.com/urfave/cli/v2 v2.24.4
 	golang.org/x/crypto v0.5.0
 	gopkg.in/src-d/go-git.v4 v4.13.1
 )

@@ -7,7 +7,7 @@ require (
 	github.com/docker/cli v23.0.0+incompatible
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker v23.0.0-rc.1+incompatible
-	github.com/moby/buildkit v0.11.2
+	github.com/moby/buildkit v0.11.6
 	github.com/ryanuber/go-glob v1.0.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/urfave/cli/v2 v2.24.3
@@ -18,7 +18,7 @@ require (
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
-	github.com/containerd/containerd v1.6.16-0.20230124210447-1709cfe273d9 // indirect
+	github.com/containerd/containerd v1.6.20 // indirect
 	github.com/containerd/typeurl v1.0.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
@@ -37,8 +37,8 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/opencontainers/image-spec v1.0.3-0.20220303224323-02efb9a75ee1 // indirect
-	github.com/opencontainers/runc v1.1.3 // indirect
+	github.com/opencontainers/image-spec v1.1.0-rc2.0.20221005185240-3a7f492d3f1b // indirect
+	github.com/opencontainers/runc v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.0.0 // indirect

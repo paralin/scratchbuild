@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/docker-library/go-dockerlibrary v0.0.0-20200821205225-669fbe5c1d52
-	github.com/docker/cli v23.0.0+incompatible
+	github.com/docker/cli v23.0.6+incompatible
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker v23.0.0-rc.1+incompatible
 	github.com/moby/buildkit v0.11.2

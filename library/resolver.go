@@ -6,11 +6,11 @@ import (
 	"path"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/docker-library/go-dockerlibrary/manifest"
 	"github.com/docker/distribution/reference"
-	git "gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
+	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	log "github.com/sirupsen/logrus"
 )
 
 // LibraryRepo is the Git URL to the official images repository.

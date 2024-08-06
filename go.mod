@@ -8,7 +8,7 @@ require (
 	github.com/docker/distribution v2.8.3+incompatible
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/go-git/go-git/v5 v5.11.0
-	github.com/moby/buildkit v0.12.4
+	github.com/moby/buildkit v0.12.5
 	github.com/ryanuber/go-glob v1.0.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.1

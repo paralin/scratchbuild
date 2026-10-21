@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/docker/distribution/reference"
+	"github.com/distribution/reference"
 	dfparser "github.com/moby/buildkit/frontend/dockerfile/parser"
 	"github.com/paralin/scratchbuild/arch"
 	log "github.com/sirupsen/logrus"

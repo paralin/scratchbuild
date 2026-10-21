@@ -3,9 +3,9 @@ module github.com/paralin/scratchbuild
 go 1.19
 
 require (
+	github.com/distribution/reference v0.5.0
 	github.com/docker-library/go-dockerlibrary v0.0.0-20200821205225-669fbe5c1d52
 	github.com/docker/cli v24.0.7+incompatible
-	github.com/docker/distribution v2.8.3+incompatible
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/moby/buildkit v0.12.4
@@ -25,7 +25,7 @@ require (
 	github.com/containerd/typeurl/v2 v2.1.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
-	github.com/distribution/reference v0.5.0 // indirect
+	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect

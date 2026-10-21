@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/docker-library/go-dockerlibrary/manifest"
-	"github.com/docker/distribution/reference"
+	"github.com/distribution/reference"
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	log "github.com/sirupsen/logrus"
